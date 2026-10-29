@@ -39,11 +39,31 @@ home town and once with a depleted forest, and prints how their strategies,
 buildings, forests, wildlife and soil diverge, why (the causal chain of
 events) and how the result changes with region gravity and across seeds.
 
+To watch both runs side by side as maps, write the replay viewer and open
+it in a browser:
+
+```bash
+./gradlew -PcoreOnly :core:run --args="replay --out evolve-replay.html"
+```
+
 Other commands (`run`, `resume`, `inspect`, `why`, `bench`) are listed by:
 
 ```bash
 ./gradlew -PcoreOnly :core:run --args="help"
 ```
+
+### Get the mod
+
+Every push is built by GitHub Actions. The newest jar from the
+`claude/project-evolve` branch is mirrored to
+[`ci-logs/claude/project-evolve`](https://github.com/jvsxhtznyq-beep/zendrahub/tree/ci-logs/claude/project-evolve)
+as `evolve-mod/evolve-0.1.0.jar`, and each Actions run attaches it as the
+`evolve-mod` artifact.
+
+To play: install Fabric Loader 0.20.1 or newer for Minecraft 26.1.2, put the
+jar and Fabric API (0.155.3+26.1.2 or newer) in `.minecraft/mods`, open a
+world and run `/evolve start <town name>`. `docs/MOD_GUIDE.md` covers the
+rest.
 
 ### Build the mod
 
