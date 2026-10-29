@@ -69,9 +69,12 @@ public final class CivilizationSystem implements SimSystem {
                 refreshStyle(ctx, s, area, shift);
             }
         } else {
-            boolean due = s.lastDecision == null || shift >= 0
+            boolean first = s.lastDecision == null;
+            boolean due = first || shift >= 0
                     || Math.floorMod(ctx.day() + s.id, cfg.strategyInterval) == 0;
-            long changed = due ? review(ctx, s, area, needs, shift) : -1;
+            // A town's first review answers its founding: what it found around it.
+            long reviewCause = shift >= 0 ? shift : (first ? foundingEvent(ctx.state, s) : -1);
+            long changed = due ? review(ctx, s, area, needs, reviewCause) : -1;
             long cause = changed >= 0 ? changed : shift;
             Trade.manage(ctx, s, area, needs, ledger, cause);
             Outposts.manageTown(ctx, this, s, needs, ledger, cause);
@@ -104,6 +107,13 @@ public final class CivilizationSystem implements SimSystem {
                 abandonTown(ctx, s);
             }
         }
+    }
+
+    /** The settlement's SETTLEMENT_FOUNDED event, or -1 if it has left the retained history. */
+    private static long foundingEvent(WorldState st, Settlement s) {
+        List<SimEvent> founded = st.events.filter(e -> e.type() == EventType.SETTLEMENT_FOUNDED
+                && e.settlementId() == s.id);
+        return founded.isEmpty() ? -1 : founded.get(founded.size() - 1).id();
     }
 
     /** Re-evaluates strategy and building style. Returns the STRATEGY_CHANGED event id, or -1. */

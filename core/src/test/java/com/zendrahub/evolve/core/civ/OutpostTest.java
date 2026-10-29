@@ -49,7 +49,8 @@ class OutpostTest {
         SimEvent founded = st.events.ofType(EventType.OUTPOST_FOUNDED).get(0);
         SimEvent changed = st.events.ofType(EventType.STRATEGY_CHANGED).get(0);
         assertEquals(changed.id(), founded.causeId());
-        assertEquals(changed.id(), st.events.causalChain(founded.id()).get(0).id());
+        List<SimEvent> chain = st.events.causalChain(founded.id());
+        assertEquals(changed.id(), chain.get(chain.size() - 2).id());
         assertTrue(changed.message().contains("OUTPOST"), changed.message());
 
         // A supply road joins them, and the host is told to lay it.

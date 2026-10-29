@@ -124,17 +124,24 @@ class IntegrationTest {
         assertNotNull(home.lastDecision, "no strategic evaluation happened");
         assertEquals(Strategy.values().length, home.lastDecision.scores().size());
         assertFalse(home.lastDecision.reasons().isEmpty());
-        List<SimEvent> turns = s.events.filter(e -> e.settlementId() == home.id
-                && (e.type() == EventType.STRATEGY_CHANGED || e.type() == EventType.OUTPOST_FOUNDED
-                || e.type() == EventType.TRADE_ROUTE_OPENED));
-        boolean traced = false;
-        for (SimEvent turn : turns) {
-            if (s.events.causalChain(turn.id()).size() > 1) {
-                traced = true;
-                break;
+        // Every change of course states its scores and its main reason.
+        List<SimEvent> changes = s.events.filter(e -> e.settlementId() == home.id
+                && e.type() == EventType.STRATEGY_CHANGED);
+        assertFalse(changes.isEmpty(), "a town in a depleted forest never changed course");
+        for (SimEvent e : changes) {
+            for (Strategy st : Strategy.values()) {
+                assertTrue(e.message().contains(st.name()), "unexplained: " + e);
             }
         }
-        assertTrue(turns.isEmpty() || traced, "strategic turns have no recorded cause");
+        // The first one answers the founding, and outposts and trade routes link to the decisions behind them.
+        assertTrue(s.events.causalChain(changes.get(0).id()).size() > 1, "no cause for: " + changes.get(0));
+        List<SimEvent> acts = s.events.filter(e -> (e.settlementId() == home.id
+                && e.type() == EventType.TRADE_ROUTE_OPENED)
+                || (e.type() == EventType.OUTPOST_FOUNDED && s.settlement(e.settlementId()) != null
+                && s.settlement(e.settlementId()).parentId == home.id));
+        for (SimEvent act : acts) {
+            assertTrue(s.events.causalChain(act.id()).size() > 1, "no recorded cause for: " + act);
+        }
     }
 
     /** The environment changes behaviour: lower gravity lets the same town build taller. */
