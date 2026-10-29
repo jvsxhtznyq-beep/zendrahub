@@ -5,13 +5,17 @@ import com.zendrahub.evolve.core.Simulation;
 import com.zendrahub.evolve.core.event.SimEvent;
 import com.zendrahub.evolve.core.model.Settlement;
 import com.zendrahub.evolve.core.model.WorldState;
+import com.zendrahub.evolve.core.persist.Json;
 import com.zendrahub.evolve.core.persist.SaveManager;
 import com.zendrahub.evolve.core.scenario.Scenarios;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +29,7 @@ import java.util.Map;
  * evolve inspect FILE [--events N]
  * evolve why     FILE EVENT_ID                         causal chain behind an event
  * evolve bench   [--quick]
+ * evolve replay  --out FILE [--seed N] [--days N] [--every N]
  * </pre>
  */
 public final class EvolveCli {
@@ -85,6 +90,23 @@ public final class EvolveCli {
                 Report.events(out, chain);
             }
             case "bench" -> Bench.run(out, o.flag("quick"));
+            case "replay" -> {
+                long seed = o.longOpt("seed", DEFAULT_SEED);
+                int days = o.intOpt("days", 240);
+                int every = Math.max(1, o.intOpt("every", 4));
+                Simulation abundant = Scenarios.forestTown(seed, false, SimConfig.defaults());
+                Simulation depleted = Scenarios.forestTown(seed, true, SimConfig.defaults());
+                Map<String, Object> root = new LinkedHashMap<>();
+                root.put("format", "evolve-replay");
+                root.put("version", 1L);
+                root.put("world", Replay.world(abundant.state()));
+                root.put("runs", List.of(
+                        Replay.record("Abundant timber", abundant, days, every),
+                        Replay.record("Depleted forest", depleted, days, every)));
+                Path file = Path.of(o.require("out"));
+                Files.writeString(file, Json.write(root));
+                out.println("Wrote " + (days / every + 1) + " frames per run to " + file);
+            }
             case "help", "--help", "-h" -> usage(out);
             default -> throw new IllegalArgumentException("unknown command '" + command + "'");
         }
@@ -134,13 +156,14 @@ public final class EvolveCli {
                   inspect FILE [--events N]
                   why     FILE EVENT_ID                      causal chain behind an event
                   bench   [--quick]                          throughput, memory and save/load timings
+                  replay  --out FILE [--seed N] [--days N] [--every N]  frames of both forest scenarios for the viewer
                 """);
     }
 
     /** Minimal --key value / --flag / positional argument parsing. */
     static final class Options {
         private final Map<String, String> named = new HashMap<>();
-        private final List<String> positional = new java.util.ArrayList<>();
+        private final List<String> positional = new ArrayList<>();
 
         static Options parse(String[] args, int from) {
             Options o = new Options();
