@@ -87,8 +87,10 @@ public final class Scenarios {
     }
 
     /**
-     * A site at least {@code minDistance} cells from {@code awayFrom} with good
-     * quarrying and some forage, or null if the world has none.
+     * A livable site at least {@code minDistance} cells from {@code awayFrom}
+     * that also has good quarrying, or null if the world has none. Livable
+     * means enough wild food and farmland within reach to feed a young town:
+     * a stone site in barren mountains would only starve.
      */
     public static GridPos stoneSite(WorldState s, GridPos awayFrom, int minDistance) {
         GridPos best = null;
@@ -97,21 +99,25 @@ public final class Scenarios {
             for (int x = 1; x < s.width - 1; x++) {
                 Cell c = s.cell(x, z);
                 GridPos p = new GridPos(x, z);
-                if (!c.biome.buildable() || p.chebyshev(awayFrom) < minDistance) {
+                if (!c.biome.buildable() || c.biome == Biome.MOUNTAIN || c.biome == Biome.DESERT
+                        || p.chebyshev(awayFrom) < minDistance) {
                     continue;
                 }
                 double stone = 0;
-                double forage = 0;
+                double food = 0;
                 for (int dz = -2; dz <= 2; dz++) {
                     for (int dx = -2; dx <= 2; dx++) {
                         Cell n = s.cell(x + dx, z + dz);
                         if (n != null) {
                             stone += n.biome.stoneRichness;
-                            forage += n.forage;
+                            food += n.forage + n.herbivores * 8 + (n.biome.farmSuitability >= 0.4 ? 40 : 0);
                         }
                     }
                 }
-                double score = stone * 10 + forage * 0.05 - p.distance(awayFrom) * 0.2;
+                if (food < MIN_FOOD_POTENTIAL) {
+                    continue;
+                }
+                double score = stone * 10 + food * 0.02 - p.distance(awayFrom) * 0.2;
                 if (score > bestScore) {
                     bestScore = score;
                     best = p;
@@ -120,6 +126,9 @@ public final class Scenarios {
         }
         return best;
     }
+
+    /** Wild food plus farmland bonus within two cells that a new town needs (see {@link #stoneSite}). */
+    private static final double MIN_FOOD_POTENTIAL = 900;
 
     /** Spread-out town sites for large-world benchmarks: the best cell in each tile of a lattice. */
     public static List<GridPos> latticeSites(WorldState s, int count, int spacing) {
