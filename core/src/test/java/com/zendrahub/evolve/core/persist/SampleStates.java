@@ -41,6 +41,8 @@ final class SampleStates {
         west.initialForestCover = 0.8;
         west.herbivores = 31.5;
         west.initialHerbivores = 40;
+        west.forestDepleted = true;
+        west.wildlifeDepleted = true;
         Region east = new Region(1, "Skyreach \"East\"", 3, 0, 6, 4);
         east.env.set(0.6, 1.25, 0.004, 0.05);
         east.env.gravityFlux = true;

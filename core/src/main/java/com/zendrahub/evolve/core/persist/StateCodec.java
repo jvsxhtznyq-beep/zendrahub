@@ -146,6 +146,8 @@ public final class StateCodec {
         m.put("initialForestCover", r.initialForestCover);
         m.put("herbivores", r.herbivores);
         m.put("initialHerbivores", r.initialHerbivores);
+        m.put("forestDepleted", r.forestDepleted);
+        m.put("wildlifeDepleted", r.wildlifeDepleted);
         EnvironmentProfile e = r.env;
         Map<String, Object> env = new LinkedHashMap<>();
         env.put("gravity", e.gravity);
@@ -452,6 +454,8 @@ public final class StateCodec {
         r.initialForestCover = f.getDouble("initialForestCover");
         r.herbivores = f.getDouble("herbivores", 0);
         r.initialHerbivores = f.getDouble("initialHerbivores", 0);
+        r.forestDepleted = f.getBool("forestDepleted", false);
+        r.wildlifeDepleted = f.getBool("wildlifeDepleted", false);
         Fields e = f.getObject("env");
         EnvironmentProfile env = r.env;
         env.gravity = e.getDouble("gravity");
