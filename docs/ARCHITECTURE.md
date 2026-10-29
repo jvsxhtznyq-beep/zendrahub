@@ -105,6 +105,8 @@ unless stated.
    `growthFactor`.
 3. **Herbivores.** Eat forage; births scale with how well fed they are and
    with habitat quality, which depends on forest cover (animals need cover).
+   A cell's carrying capacity scales with habitat quality and with the
+   region's fertility, so erosion after deforestation also thins wildlife.
    Starvation and crowding raise deaths. Hungry or exposed animals migrate to
    the best neighbouring cell.
 4. **Reclamation.** Ruined buildings free their built area and seed
