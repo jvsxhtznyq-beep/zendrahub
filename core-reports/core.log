@@ -1,0 +1,163 @@
+Downloading https://services.gradle.org/distributions/gradle-9.8.2-bin.zip
+..............10%..............20%...............30%..............40%...............50%..............60%...............70%..............80%...............90%..............100%
+
+Welcome to Gradle 9.8.2!
+
+Here are the highlights of this release:
+ - Java 27 support
+ - Maven mirror settings reuse
+ - Linked problem locations in build output
+
+For more details see https://docs.gradle.org/9.8.2/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :core:compileJava
+> Task :core:processResources
+> Task :core:classes
+> Task :core:compileTestJava
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses
+> Task :core:test
+
+> Task :core:demo
+PROJECT EVOLVE - milestone 1 demonstration
+Seed 20261029, 240 days (6 years). Same world, same code, same towns;
+the only difference is the state of the forest around Oakridge on day 0.
+
+                               ABUNDANT TIMBER                    DEPLETED FOREST                   
+Home cell / region             (13, 3) Dunmere Skyreach           (13, 3) Dunmere Skyreach          
+Population now / peak          87 / 92                            92 / 92                           
+Strategy now                   OUTPOST                            OUTPOST                           
+Strategy changes               1                                  5                                 
+Strategies used                [EXPAND, OUTPOST]                  [EXPAND, CONSERVE, TRADE, OUTPOST]
+Outposts founded               4                                  4                                 
+Trade routes                   0                                  2                                 
+Preferred material             TIMBER                             STONE                             
+Buildings standing by material {TIMBER=36}                        {TIMBER=22, STONE=14}             
+Timber harvested (logs)        4133                               1378                              
+Home region forest cover       0.77 -> 0.24                       0.20 -> 0.23                      
+Home region herbivores         55 -> 8                            55 -> 5                           
+Home region fertility          1.29 -> 1.21                       1.29 -> 1.13                      
+Timber / food shortages        0 / 0                              0 / 0                             
+Storms in home region          2                                  5                                 
+Events recorded (world)        333                                369                               
+
+Strategy history, ABUNDANT TIMBER: EXPAND d0 -> OUTPOST d119
+Strategy history, DEPLETED FOREST: EXPAND d0 -> OUTPOST d1 -> TRADE d59 -> CONSERVE d79 -> EXPAND d99 -> OUTPOST d119
+
+Why, in the DEPLETED FOREST world:
+  Causal chain to its first strategic turn:
+  #2     day    0  SETTLEMENT_FOUNDED   Oakridge is founded at (13, 3) in Dunmere Skyreach with 20 people, building in STONE
+  #7     day    1  STRATEGY_CHANGED     Oakridge turns from EXPAND to OUTPOST (EXPAND 0.27, CONSERVE 0.58, TRADE 0.57, OUTPOST 0.79): timber: 276 logs standing within 2 cells, regrowth ~5.4/day, demand 7.5/day -> covers 0.67 of 120 days, scarcity 0.83
+  Direct consequences:
+  #8     day    1  OUTPOST_FOUNDED      Oakridge sends 5 people to found Oakridge Camp at (9, 3) in Dunmere Skyreach (4.0 cells away)
+  Current state:
+  Oakridge           town    pop  92  food    836  timber   1124  stone     41  OUTPOST  STONE     at (13, 3)
+    region Dunmere Skyreach: gravity 0.44, fertility 1.13, wood decay 0.27%/day, storminess 0.04, forest cover 0.23
+    labour: gather 2 hunt 1 farm 45 build 4 idle 3
+    last decision (day 239): OUTPOST  EXPAND 0.12  CONSERVE 0.42  TRADE 0.05  OUTPOST 0.78
+      - timber: 1991 logs standing within 2 cells, regrowth ~7.5/day, demand 34.4/day -> covers 0.59 of 120 days, scarcity 0.91
+      - housing gap 0 (pressure 0.00); regrowth meets 22% of demand; substitutes (stone/mud) 0.44
+      - best trade partner Stonebrook: 0 spare logs, 13.0 cells away, haul loss 25% -> value 0.06
+      - current outpost site (5, 6): 3453 logs nearby, 8.5 cells away, haul loss 11% -> value 0.75
+      - memories: timber shortage 0.00, trade failure 0.15, abandoned outpost 0.05
+      - +0.12 for staying with OUTPOST
+    remembers: OUTPOST_FOUNDED(day 1) STORM_DAMAGE(day 14) ENVIRONMENT_SHIFT(day 15) ENVIRONMENT_SHIFT(day 24) ENVIRONMENT_SHIFT(day 47) STORM_DAMAGE(day 58) ENVIRONMENT_SHIFT(day 60) ENVIRONMENT_SHIFT(day 70) ENVIRONMENT_SHIFT(day 80) STORM_DAMAGE(day 84) ENVIRONMENT_SHIFT(day 112) STORM_DAMAGE(day 115) OUTPOST_ABANDONED(day 115) TRADE_FAILURE(day 118) OUTPOST_FOUNDED(day 119) ENVIRONMENT_SHIFT(day 127) ENVIRONMENT_SHIFT(day 137) ENVIRONMENT_SHIFT(day 145) OUTPOST_FOUNDED(day 149) ENVIRONMENT_SHIFT(day 178) STORM_DAMAGE(day 179) OUTPOST_FOUNDED(day 206) ENVIRONMENT_SHIFT(day 210)
+    buildings: 30 standing {TIMBER=16, STONE=14}
+  Oakridge Camp      outpost pop   0  food      0  timber      0  stone      0  OUTPOST  STONE     at (9, 3)  [abandoned day 115]
+    region Dunmere Skyreach: gravity 0.44, fertility 1.13, wood decay 0.27%/day, storminess 0.04, forest cover 0.23
+    labour: gather 4 log 1 idle 6
+    remembers: STORM_DAMAGE(day 14) ENVIRONMENT_SHIFT(day 15) ENVIRONMENT_SHIFT(day 24) ENVIRONMENT_SHIFT(day 47) STORM_DAMAGE(day 58) ENVIRONMENT_SHIFT(day 60) ENVIRONMENT_SHIFT(day 70) ENVIRONMENT_SHIFT(day 80) STORM_DAMAGE(day 84) ENVIRONMENT_SHIFT(day 112) STORM_DAMAGE(day 115)
+    buildings: 0 standing {}, 1 ruined
+  Oakridge Camp 2    outpost pop   1  food      0  timber     46  stone      9  OUTPOST  MUD_BRICK at (13, 7)
+    region Dunmere Skyreach: gravity 0.44, fertility 1.13, wood decay 0.27%/day, storminess 0.04, forest cover 0.23
+    labour: gather 1
+    remembers: ENVIRONMENT_SHIFT(day 127) ENVIRONMENT_SHIFT(day 137) ENVIRONMENT_SHIFT(day 145) ENVIRONMENT_SHIFT(day 178) STORM_DAMAGE(day 179) ENVIRONMENT_SHIFT(day 210) FOOD_SHORTAGE(day 217) FAMINE(day 222) FAMINE(day 223) FAMINE(day 224) FAMINE(day 226) FOOD_SHORTAGE(day 227) FAMINE(day 228) FAMINE(day 229) FAMINE(day 232) FOOD_SHORTAGE(day 237) FAMINE(day 239)
+    buildings: 2 standing {TIMBER=2}
+  Oakridge Camp 3    outpost pop  12  food    110  timber     43  stone     40  OUTPOST  TIMBER    at (9, 6)
+    region Dunmere Skyreach: gravity 0.44, fertility 1.13, wood decay 0.27%/day, storminess 0.04, forest cover 0.23
+    labour: gather 1 hunt 1 log 6 haul 3
+    remembers: ENVIRONMENT_SHIFT(day 178) STORM_DAMAGE(day 179) ENVIRONMENT_SHIFT(day 210)
+    buildings: 2 standing {TIMBER=2}
+  Oakridge Camp 4    outpost pop   7  food    130  timber     27  stone     11  OUTPOST  TIMBER    at (5, 6)
+    region Gloamcrest Skyreach: gravity 0.77, fertility 1.23, wood decay 0.26%/day, storminess 0.02, forest cover 0.47
+    labour: gather 3 log 2 haul 1
+    remembers: ENVIRONMENT_SHIFT(day 233)
+    buildings: 2 standing {TIMBER=2}
+
+Why, in the ABUNDANT TIMBER world:
+  Causal chain to its first strategic turn:
+  #160   day  119  STRATEGY_CHANGED     Oakridge turns from EXPAND to OUTPOST (EXPAND 0.45, CONSERVE 0.22, TRADE 0.06, OUTPOST 0.50): timber: 2720 logs standing within 2 cells, regrowth ~2.3/day, demand 24.4/day -> covers 0.98 of 120 days, scarcity 0.52
+  Direct consequences:
+  #161   day  119  OUTPOST_FOUNDED      Oakridge sends 8 people to found Oakridge Camp at (13, 7) in Dunmere Skyreach (4.0 cells away)
+  #205   day  149  OUTPOST_FOUNDED      Oakridge sends 8 people to found Oakridge Camp 2 at (9, 4) in Dunmere Skyreach (4.1 cells away)
+  #253   day  179  OUTPOST_FOUNDED      Oakridge sends 8 people to found Oakridge Camp 3 at (9, 8) in Hollowfell Vale (6.4 cells away)
+  #328   day  238  OUTPOST_FOUNDED      Oakridge sends 8 people to found Oakridge Camp 4 at (5, 7) in Gloamcrest Skyreach (8.9 cells away)
+  Current state:
+  Oakridge           town    pop  87  food   2255  timber   2380  stone      6  OUTPOST  TIMBER    at (13, 3)
+    region Dunmere Skyreach: gravity 0.44, fertility 1.21, wood decay 0.27%/day, storminess 0.03, forest cover 0.24
+    labour: gather 1 farm 45 idle 6
+    last decision (day 239): OUTPOST  EXPAND 0.10  CONSERVE 0.38  TRADE 0.07  OUTPOST 0.66
+      - timber: 1405 logs standing within 2 cells, regrowth ~2.2/day, demand 33.7/day -> covers 0.38 of 120 days, scarcity 1.00
+      - housing gap 0 (pressure 0.00); regrowth meets 6% of demand; substitutes (stone/mud) 0.44
+      - best trade partner Stonebrook: 0 spare logs, 13.0 cells away, haul loss 25% -> value 0.07
+      - current outpost site (5, 7): 4974 logs nearby, 8.9 cells away, haul loss 11% -> value 0.89
+      - memories: timber shortage 0.00, trade failure 0.00, abandoned outpost 0.78
+      - +0.12 for staying with OUTPOST
+    remembers: STORM_DAMAGE(day 14) ENVIRONMENT_SHIFT(day 15) ENVIRONMENT_SHIFT(day 47) ENVIRONMENT_SHIFT(day 80) STORM_DAMAGE(day 84) ENVIRONMENT_SHIFT(day 112) OUTPOST_FOUNDED(day 119) ENVIRONMENT_SHIFT(day 145) OUTPOST_FOUNDED(day 149) ENVIRONMENT_SHIFT(day 178) OUTPOST_FOUNDED(day 179) ENVIRONMENT_SHIFT(day 210) OUTPOST_ABANDONED(day 237) OUTPOST_FOUNDED(day 238)
+    buildings: 32 standing {TIMBER=32}
+  Oakridge Camp      outpost pop   0  food      0  timber      0  stone      0  OUTPOST  TIMBER    at (13, 7)  [abandoned day 237]
+    region Dunmere Skyreach: gravity 0.44, fertility 1.21, wood decay 0.27%/day, storminess 0.03, forest cover 0.24
+    labour: gather 1
+    remembers: ENVIRONMENT_SHIFT(day 145) ENVIRONMENT_SHIFT(day 178) ENVIRONMENT_SHIFT(day 210) FOOD_SHORTAGE(day 214) FAMINE(day 220) FAMINE(day 221) FAMINE(day 222) FAMINE(day 224) FOOD_SHORTAGE(day 224) FAMINE(day 225) FAMINE(day 227) FAMINE(day 231) FAMINE(day 232) FAMINE(day 233) FOOD_SHORTAGE(day 234) FAMINE(day 237)
+    buildings: 0 standing {}
+  Oakridge Camp 2    outpost pop  12  food    155  timber     55  stone      5  OUTPOST  TIMBER    at (9, 4)
+    region Dunmere Skyreach: gravity 0.44, fertility 1.21, wood decay 0.27%/day, storminess 0.03, forest cover 0.24
+    labour: gather 4 log 5 haul 2
+    remembers: ENVIRONMENT_SHIFT(day 178) ENVIRONMENT_SHIFT(day 210)
+    buildings: 2 standing {TIMBER=2}
+  Oakridge Camp 3    outpost pop  12  food    127  timber     56  stone      3  OUTPOST  TIMBER    at (9, 8)
+    region Hollowfell Vale: gravity 1.00, fertility 1.01, wood decay 0.18%/day, storminess 0.02, forest cover 0.27
+    labour: gather 4 log 5 haul 2
+    buildings: 2 standing {TIMBER=2}
+  Oakridge Camp 4    outpost pop   8  food     85  timber     74  stone      6  OUTPOST  TIMBER    at (5, 7)
+    region Gloamcrest Skyreach: gravity 0.77, fertility 1.23, wood decay 0.26%/day, storminess 0.02, forest cover 0.52
+    labour: gather 3 log 3 idle 1
+    buildings: 0 standing {}
+
+Environment rule check: the abundant-timber world with the home region's gravity forced to
+  gravity  mean storeys   stone buildings  timber logs    strategies used        population
+  0.60     1.77           0 of 30          4278           [EXPAND, OUTPOST]      99        
+  1.00     1.55           0 of 31          4590           [EXPAND, OUTPOST]      91        
+  1.60     1.00           0 of 34          3816           [EXPAND, OUTPOST]      76        
+
+Seed sweep: 12 worlds (seeds 20261029..20261040), both starting conditions
+  worlds where the two towns' histories diverged: 12 of 12
+                             abundant                 depleted                
+  worlds that used EXPAND    12 of 12                 12 of 12                
+  worlds that used CONSERVE  0 of 12                  6 of 12                 
+  worlds that used TRADE     0 of 12                  5 of 12                 
+  worlds that used OUTPOST   11 of 12                 12 of 12                
+  outposts founded (total)   23                       23                      
+  mean final population      62.33                    44.92                   
+
+> Task :core:bench
+EVOLVE benchmark: seed 7000001, 20 warm-up days, 100 timed days, Java 25.0.5, 4 cores
+cells     towns    people    ms/day      cell-days/s   buildings  events     heap MB   save KB    save ms    load ms  
+32x32     4        151       0.82        1247550       56         217        0.53      173        16.35      37.59    
+64x64     16       497       1.30        3139853       199        817        0.69      682        10.98      31.60    
+128x128   63       2241      2.64        6199714       876        3302       2.74      2757       52.30      88.30    
+256x256   248      8942      17.88       3665951       3405       12473      9.69      8749       144.49     237.02   
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1793306563681.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/zendrahub/zendrahub/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 22s
+6 actionable tasks: 6 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.2/userguide/configuration_cache_enabling.html

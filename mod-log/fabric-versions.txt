@@ -1,0 +1,5 @@
+Minecraft 26.1.2: Fabric Loader 0.20.1 (stable builds: 1), Fabric API 0.155.3+26.1.2, Loom (net.fabricmc.fabric-loom) 1.19.3
+loader=0.20.1
+fabric_api=0.155.3+26.1.2
+loom=1.19.3
+gradle_args=-Ploader_version=0.20.1 -Pfabric_api_version=0.155.3+26.1.2 -Ploom_version=1.19.3

@@ -1,0 +1,47 @@
+Downloading https://services.gradle.org/distributions/gradle-9.8.2-bin.zip
+..............10%..............20%...............30%..............40%...............50%..............60%...............70%..............80%...............90%..............100%
+
+Welcome to Gradle 9.8.2!
+
+Here are the highlights of this release:
+ - Java 27 support
+ - Maven mirror settings reuse
+ - Linked problem locations in build output
+
+For more details see https://docs.gradle.org/9.8.2/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Configure project :mod
+Fabric Loom: 1.19.3
+
+> Task :mod:compileJava
+Note: /home/runner/work/zendrahub/zendrahub/mod/src/main/java/com/zendrahub/evolve/mod/McCompat.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :mod:processResources
+> Task :mod:classes
+> Task :mod:processIncludeJars
+> Task :mod:jar
+> Task :mod:sourcesJar
+> Task :mod:assemble
+> Task :mod:compileTestJava NO-SOURCE
+> Task :mod:processTestResources NO-SOURCE
+> Task :mod:testClasses UP-TO-DATE
+> Task :mod:test NO-SOURCE
+> Task :mod:validateAccessWidener NO-SOURCE
+> Task :mod:check UP-TO-DATE
+> Task :mod:build
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1793306562615.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/zendrahub/zendrahub/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 33s
+5 actionable tasks: 5 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.2/userguide/configuration_cache_enabling.html
