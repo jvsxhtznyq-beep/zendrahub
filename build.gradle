@@ -1,22 +1,13 @@
+// Shared settings for the EVOLVE subprojects: the simulation core and the Fabric mod.
+subprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
 
-plugins {
-    id 'fabric-loom' version '1.5.7'
-}
+    repositories {
+        mavenCentral()
+    }
 
-group = project.maven_group
-version = project.mod_version
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
 }

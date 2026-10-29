@@ -1,0 +1,16 @@
+# Gradle
+.gradle/
+build/
+*/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Fabric / Loom dev runs
+run/
+.loom-cache/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+out/
+bin/

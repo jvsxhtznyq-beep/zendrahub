@@ -1,10 +1,25 @@
-
 pluginManagement {
     repositories {
-        maven { url = 'https://maven.fabricmc.net/' }
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
         gradlePluginPortal()
         mavenCentral()
     }
+    plugins {
+        // Minecraft 26.1+ ships unobfuscated, so the mod uses Loom's non-remapping plugin.
+        id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    }
 }
 
-rootProject.name = "zendrahub"
+rootProject.name = 'zendrahub'
+
+// Engine-independent simulation: builds and tests with nothing but a JDK.
+include 'core'
+
+// The Fabric mod resolves Minecraft and Fabric artifacts while Gradle configures it.
+// Pass -PcoreOnly to build and test the core where those servers are unreachable.
+if (!providers.gradleProperty('coreOnly').isPresent()) {
+    include 'mod'
+}

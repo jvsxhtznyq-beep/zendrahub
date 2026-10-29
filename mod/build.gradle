@@ -1,0 +1,44 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+base {
+    archivesName = 'evolve'
+}
+
+dependencies {
+    // Unobfuscated game: no mappings line, and dependencies need no remapping.
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+sourceSets {
+    main {
+        java {
+            // The simulation core has no Minecraft dependencies; compiling it into
+            // the mod keeps the jar free of nested libraries.
+            srcDir rootProject.file('core/src/main/java')
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+}
+
+processResources {
+    def props = [
+            version          : project.version,
+            minecraft_version: project.minecraft_version,
+            loader_version   : project.loader_version
+    ]
+    inputs.properties props
+    filesMatching('fabric.mod.json') {
+        expand props
+    }
+}
+
+java {
+    withSourcesJar()
+}

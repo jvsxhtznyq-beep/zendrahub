@@ -1,0 +1,39 @@
+package com.zendrahub.evolve.core.event;
+
+/** Everything the simulation records in its history. */
+public enum EventType {
+    WORLD_CREATED,
+    SEASON_CHANGED,
+
+    // environment
+    STORM,
+    ENVIRONMENT_SHIFT,
+
+    // ecosystem
+    FOREST_DEPLETED,
+    FOREST_RECOVERED,
+    WILDLIFE_DECLINE,
+    WILDLIFE_RECOVERY,
+    WILDLIFE_MIGRATION,
+    RECLAIMED,
+    OBSERVATION,
+
+    // civilization
+    SETTLEMENT_FOUNDED,
+    OUTPOST_FOUNDED,
+    SETTLEMENT_ABANDONED,
+    OUTPOST_ABANDONED,
+    POPULATION_GROWTH,
+    STARVATION,
+    FOOD_SHORTAGE,
+    TIMBER_SHORTAGE,
+    STRATEGY_CHANGED,
+    MATERIAL_CHANGED,
+    BUILDING_STARTED,
+    BUILDING_COMPLETED,
+    BUILDING_DAMAGED,
+    BUILDING_RUINED,
+    TRADE_ROUTE_OPENED,
+    TRADE_ROUTE_CLOSED,
+    REPLANTED
+}
