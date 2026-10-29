@@ -1,22 +1,121 @@
-name: Build ZendraHub
+name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches-ignore:
+      - 'ci-logs/**'
+  pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  core:
+    name: Simulation core (tests, demo, benchmarks)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
-      - name: Build
-        run: ./gradlew build || gradle build
-      - uses: actions/upload-artifact@v4
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test, run the demo and the benchmarks
+        run: |
+          set -o pipefail
+          ./gradlew -PcoreOnly :core:test :core:demo :core:bench --stacktrace 2>&1 | tee core.log
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: zendrahub-jar
-          path: build/libs/*.jar
+          name: core-reports
+          path: |
+            core.log
+            core/build/reports/tests/
+          if-no-files-found: ignore
+
+  mod:
+    name: Fabric mod (Minecraft 26.1.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Resolve the Fabric toolchain
+        id: fabric
+        run: |
+          mc=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
+          if python3 .github/scripts/resolve_fabric_versions.py "$mc" > fabric-out.txt 2> fabric-versions.txt; then
+            cat fabric-out.txt >> fabric-versions.txt
+            cat fabric-versions.txt
+            cat fabric-out.txt >> "$GITHUB_OUTPUT"
+          else
+            cat fabric-versions.txt
+            exit 1
+          fi
+      - name: Build the mod
+        run: |
+          set -o pipefail
+          ./gradlew :mod:build ${{ steps.fabric.outputs.gradle_args }} --stacktrace 2>&1 | tee mod.log
+      - name: Upload the mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolve-mod
+          path: mod/build/libs/*.jar
+      - name: Upload the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-log
+          path: |
+            mod.log
+            fabric-versions.txt
+          if-no-files-found: ignore
+
+  # Mirrors logs and the jar to the branch ci-logs/<branch>, so tools that can
+  # fetch git but cannot read the Actions API can see what happened.
+  publish-logs:
+    name: Publish logs to ci-logs/<branch>
+    needs: [core, mod]
+    if: always() && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          CORE_RESULT: ${{ needs.core.result }}
+          MOD_RESULT: ${{ needs.mod.result }}
+        run: |
+          mkdir out
+          cp -r artifacts/. out/ 2>/dev/null || true
+          {
+            echo "# CI run ${GITHUB_RUN_NUMBER} (attempt ${GITHUB_RUN_ATTEMPT})"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Branch: ${BRANCH}"
+            echo "- Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- Simulation core: ${CORE_RESULT}"
+            echo "- Fabric mod: ${MOD_RESULT}"
+          } > out/SUMMARY.md
+          cd out
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan logs
+          git add -A
+          git commit -q -m "CI logs for ${BRANCH} at ${GITHUB_SHA}"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/ci-logs/${BRANCH}"
