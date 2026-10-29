@@ -15,18 +15,26 @@ editing that file only.
 Confidence: **high** = unchanged for many versions; **medium** = recently
 renamed or reshaped, so verify first if the build fails; **low** = a guess.
 
-## Most likely to need a fix
+## Checked against other 26.1.2 code
 
-| # | Assumption | Where | Confidence | If it fails |
-|---|---|---|---|---|
-| 1 | `net.minecraft.resources.Identifier` with `Identifier.fromNamespaceAndPath(String, String)`. Relies on the 1.21.11 rename of `ResourceLocation` to `Identifier`. | `McCompat.id` | medium | Switch the import back to `net.minecraft.resources.ResourceLocation` (same factory method). |
-| 2 | `new AttributeModifier(Identifier id, double amount, AttributeModifier.Operation op)`, `Operation.ADD_MULTIPLIED_BASE` | `McCompat.setMultiplier` | medium | Record since 1.21; only the id type should differ. |
-| 3 | `AttributeInstance#removeModifier(Identifier)` and `#addOrUpdateTransientModifier(AttributeModifier)` | `McCompat.setMultiplier` | medium | Same id type as #1. |
-| 4 | `Level#hasChunk(int chunkX, int chunkZ)`: true only for loaded chunks, never loads one | `McCompat.isChunkLoaded` | medium | Use `level.getChunkSource().hasChunk(x, z)`. |
-| 5 | `ServerLevel#getSeed()` | `McCompat.seed` | medium | Use `server.getWorldData().worldGenOptions().seed()`. |
-| 6 | `MinecraftServer#getWorldPath(LevelResource)` with `LevelResource.ROOT` | `McCompat.worldDir` | medium | Find the replacement for the world folder path. |
-| 7 | `Attributes.GRAVITY`, `Attributes.FALL_DAMAGE_MULTIPLIER`, `Attributes.SAFE_FALL_DISTANCE` as `Holder<Attribute>` (added in 1.20.5) | `McCompat.setRegionGravity` | medium | Field names; ids lost the `generic.` prefix in 1.21.2, but the Java field names did not change. |
-| 8 | `BlockState#canBeReplaced()`, the no-argument form | `WorldAccess.isOpen`, jobs | medium | Older form: `state.canBeReplaced(context)`; alternative: `state.is(BlockTags.REPLACEABLE)`. |
+Mojang's servers were unreachable while this was written, so each assumption
+was checked against open-source code built for Minecraft 26.1.2: Fabric API
+0.155.3+26.1.2 (FabricMC/fabric, branch 26.1.2), Fabric's example mod
+(branch 26.1.2), NeoForge (branch 26.1.x, which includes patches quoting
+Minecraft's own source) and Carpet (branch 26.1).
+
+| # | Assumption | Where | Status |
+|---|---|---|---|
+| 1 | `net.minecraft.resources.Identifier.fromNamespaceAndPath(String, String)` (`ResourceLocation` was renamed in 1.21.11) | `McCompat.id` | confirmed: Fabric's 26.1.2 example mod |
+| 2 | `new AttributeModifier(Identifier, double, AttributeModifier.Operation)` | `McCompat.setMultiplier` | confirmed: Fabric API item test mod |
+| 3 | `AttributeInstance#addTransientModifier(AttributeModifier)` and `#removeModifier(Identifier)` | `McCompat.setMultiplier` | add confirmed (NeoForge patch of `EnderMan`); remove by id assumed |
+| 4 | `Level#hasChunkAt(BlockPos)`: true only for loaded chunks | `McCompat.isChunkLoaded` | confirmed: Carpet |
+| 5 | `ServerLevel#getSeed()` | `McCompat.seed` | confirmed: Carpet |
+| 6 | `MinecraftServer#getWorldPath(LevelResource.ROOT)` | `McCompat.worldDir` | confirmed: Carpet |
+| 7 | `Attributes.GRAVITY`, `FALL_DAMAGE_MULTIPLIER`, `SAFE_FALL_DISTANCE` | `McCompat.setRegionGravity` | assumed (vanilla since 1.20.5; not used by the reference code) |
+| 8 | `BlockState#canBeReplaced()` (no arguments, vanilla since 1.20) | `WorldAccess.isOpen`, jobs | assumed; fallback `state.is(BlockTags.REPLACEABLE)` |
+| 9 | `Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)` for admin commands | `EvolveCommands` | confirmed: NeoForge commands |
+| 10 | `ChunkPos` is a record in 26.1 (`x()`, `z()`), not fields | not used; chunk coordinates are computed with `>> 4` | n/a |
 
 ## Fabric API
 
@@ -96,9 +104,8 @@ LECTERN, WHITE_BANNER.
 ## Deliberately avoided
 
 - **Mixins and access wideners**: nothing in the mod needs engine internals.
-- **Command permission checks**: the permission API was reworked around
-  1.21.11, so `/evolve` sets no `requires(...)` and every command is open to
-  every player (see the limitations in `docs/MOD_GUIDE.md`).
+- **Fabric's new permission API** (`fabric-permission-api-v1`): vanilla's
+  `Commands.hasPermission` is enough for game-master-only commands.
 - **NBT and `SavedData`**: their APIs changed repeatedly in 1.21.x. The
   simulation saves itself as JSON through the core's `SaveManager`, into
   `<world>/evolve/state.json`.

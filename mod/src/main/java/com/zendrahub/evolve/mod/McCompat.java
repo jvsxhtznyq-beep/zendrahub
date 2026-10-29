@@ -51,7 +51,7 @@ public final class McCompat {
 
     /** True if the chunk is loaded; never loads or generates it. */
     static boolean isChunkLoaded(ServerLevel level, int chunkX, int chunkZ) {
-        return level.hasChunk(chunkX, chunkZ);
+        return level.hasChunkAt(new BlockPos(chunkX << 4, 0, chunkZ << 4));
     }
 
     /** One above the highest non-air block (leaves included). Only call for loaded chunks. */
@@ -92,12 +92,11 @@ public final class McCompat {
         if (attribute == null) {
             return;
         }
-        if (Math.abs(amount) < 1.0e-4) {
-            attribute.removeModifier(modifierId);
-            return;
+        attribute.removeModifier(modifierId);
+        if (Math.abs(amount) >= 1.0e-4) {
+            attribute.addTransientModifier(
+                    new AttributeModifier(modifierId, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         }
-        attribute.addOrUpdateTransientModifier(
-                new AttributeModifier(modifierId, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
 
     static ServerPlayer player(CommandSourceStack source) {

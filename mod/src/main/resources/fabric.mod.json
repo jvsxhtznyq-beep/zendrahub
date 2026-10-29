@@ -13,7 +13,7 @@
     "main": ["com.zendrahub.evolve.mod.EvolveMod"]
   },
   "depends": {
-    "fabricloader": ">=0.18.0",
+    "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
     "minecraft": "~${minecraft_version}",
     "java": ">=25"

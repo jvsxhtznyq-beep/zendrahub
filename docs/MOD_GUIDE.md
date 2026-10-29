@@ -115,9 +115,10 @@ In the world folder, under `evolve/`:
 - The real world corrects the simulation's forest estimates only near
   players. Elsewhere the model's regrowth estimate stands.
 - Region gravity applies to players, not to mobs.
-- `/evolve` commands have no permission checks yet: on a multiplayer server,
-  any player can found towns or change the clock.
+- Any player can start the simulation, found towns and inspect everything.
+  Changing the clock (`advance`, `speed`, `pause`, `resume`) and `save` need
+  game-master permission (an operator, or cheats enabled in singleplayer).
 - Repairs are not shown: a repaired building keeps its weathered look.
-- This build targets Minecraft 26.1.2 API names that could not be checked
-  against the game when it was written. `mod/API_NOTES.md` lists every
-  assumption.
+- The Minecraft calls were written for 26.1.2 and checked against the
+  26.1.2 sources of Fabric API, NeoForge and Carpet; the build itself runs in
+  GitHub Actions. `mod/API_NOTES.md` lists every assumption.

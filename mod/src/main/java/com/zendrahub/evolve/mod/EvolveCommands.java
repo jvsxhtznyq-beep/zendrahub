@@ -72,19 +72,24 @@ final class EvolveCommands {
                                 .executes(ctx -> run(ctx.getSource(), (rt, src) ->
                                         why(rt, src, LongArgumentType.getLong(ctx, "eventId"))))))
                 .then(Commands.literal("advance")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("days", IntegerArgumentType.integer(1, EvolveRuntime.MAX_ADVANCE_DAYS))
                                 .executes(ctx -> run(ctx.getSource(), (rt, src) ->
                                         advance(rt, src, IntegerArgumentType.getInteger(ctx, "days"))))))
                 .then(Commands.literal("speed")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .then(Commands.argument("ticksPerDay", IntegerArgumentType.integer(
                                         RuntimeSettings.MIN_TICKS_PER_DAY, RuntimeSettings.MAX_TICKS_PER_DAY))
                                 .executes(ctx -> run(ctx.getSource(), (rt, src) ->
                                         speed(rt, src, IntegerArgumentType.getInteger(ctx, "ticksPerDay"))))))
                 .then(Commands.literal("pause")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(ctx -> run(ctx.getSource(), (rt, src) -> pause(rt, src, true))))
                 .then(Commands.literal("resume")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(ctx -> run(ctx.getSource(), (rt, src) -> pause(rt, src, false))))
                 .then(Commands.literal("save")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(ctx -> run(ctx.getSource(), EvolveCommands::save))));
     }
 
