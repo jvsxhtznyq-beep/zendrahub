@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "evolve",
+  "version": "${version}",
+  "name": "Project EVOLVE",
+  "description": "A world that evolves itself: settlements plan and build, forests and wildlife respond, and each region's environmental rules (gravity, fertility, wood decay, storms) shape both.",
+  "authors": ["ZendraHub"],
+  "contact": {
+    "sources": "https://github.com/jvsxhtznyq-beep/zendrahub"
+  },
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.zendrahub.evolve.mod.EvolveMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "fabric-api": "*",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=25"
+  }
+}
