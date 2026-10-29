@@ -69,6 +69,8 @@ public final class CivConfig {
     public double scarcityHorizonDays = 120;
     /** Bonus the current strategy gets, so settlements don't flip on noise. */
     public double hysteresis = 0.12;
+    /** Days a newly adopted strategy is kept before the settlement may change course again. */
+    public int strategyMinDays = 20;
     /** Bonus the material a settlement already builds with gets in the style rules. */
     public double materialHysteresis = 0.1;
     /** Timber regrowth rate settlements assume when planning (their belief, not the ecosystem's rule). */

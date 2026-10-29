@@ -20,6 +20,8 @@ public final class Settlement {
     public double stone;
 
     public Strategy strategy = Strategy.EXPAND;
+    /** Day the current strategy was adopted. */
+    public int strategySinceDay;
     /** The most recent strategic evaluation, or null before the first one. */
     public Decision lastDecision;
     public Material preferredMaterial = Material.TIMBER;
@@ -41,6 +43,7 @@ public final class Settlement {
         this.parentId = parentId;
         this.home = home;
         this.foundedDay = foundedDay;
+        this.strategySinceDay = foundedDay;
     }
 
     public boolean isOutpost() {

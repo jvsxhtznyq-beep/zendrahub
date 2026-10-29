@@ -203,4 +203,25 @@ class IntegrationTest {
         assertEquals(3, sim.state().cell(home.home).timber, 1e-9);
         assertEquals(sim.state().day, sim.state().cell(home.home).lastObservedDay);
     }
+
+    /** Outposts in low-gravity regions (tall buildings) still get their hall built. */
+    @Test
+    void outpostsBuildTheirHallsEvenWhereGravityIsLow() {
+        Simulation sim = town(SEED, false);
+        Settlement home = sim.state().settlementByName(Scenarios.HOME_TOWN);
+        Scenarios.setRegionGravity(sim.state(), home.home, 0.45);
+        sim.advance(240);
+        WorldState s = sim.state();
+        int checked = 0;
+        for (Settlement o : s.settlements) {
+            if (o.parentId != home.id || o.abandoned || s.day - o.foundedDay < 60) {
+                continue;
+            }
+            checked++;
+            boolean hall = s.buildings.stream().anyMatch(b -> b.settlementId == o.id
+                    && b.type == com.zendrahub.evolve.core.model.BuildingType.OUTPOST_HALL && b.isComplete());
+            assertTrue(hall, o.name + " (founded day " + o.foundedDay + ") has no finished hall");
+        }
+        assertTrue(checked > 0, "no outpost lasted long enough to check");
+    }
 }

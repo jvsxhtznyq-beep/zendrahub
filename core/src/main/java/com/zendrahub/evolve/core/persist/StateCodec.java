@@ -178,6 +178,7 @@ public final class StateCodec {
         m.put("timber", t.timber);
         m.put("stone", t.stone);
         m.put("strategy", t.strategy.name());
+        m.put("strategySinceDay", (long) t.strategySinceDay);
         m.put("preferredMaterial", t.preferredMaterial.name());
         m.put("abandoned", t.abandoned);
         m.put("abandonedDay", (long) t.abandonedDay);
@@ -486,6 +487,7 @@ public final class StateCodec {
         t.timber = f.getDouble("timber");
         t.stone = f.getDouble("stone");
         t.strategy = f.getEnum("strategy", Strategy.class);
+        t.strategySinceDay = f.getInt("strategySinceDay", t.foundedDay);
         t.preferredMaterial = f.getEnum("preferredMaterial", Material.class);
         t.abandoned = f.getBool("abandoned");
         t.abandonedDay = f.getInt("abandonedDay", -1);

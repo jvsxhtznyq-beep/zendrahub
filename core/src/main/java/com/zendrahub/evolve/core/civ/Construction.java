@@ -11,6 +11,8 @@ import com.zendrahub.evolve.core.model.Region;
 import com.zendrahub.evolve.core.model.Settlement;
 import com.zendrahub.evolve.core.model.WorldState;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /** What to build next, what it costs, and progress from plan to completed structure. */
@@ -143,9 +145,30 @@ final class Construction {
         if (cell == null) {
             return null;
         }
-        BuildingStyle.Choice style = BuildingStyle.choose(ctx, s, type, area);
+        BuildingStyle.Choice style = fitToStorage(type, BuildingStyle.choose(ctx, s, type, area), storageCap);
         return new Plan(type, style, cell, timberCost(type, style.material(), style.stories()),
                 stoneCost(type, style.material(), style.stories()));
+    }
+
+    /**
+     * Materials are stockpiled before work starts, so a building must fit in
+     * storage (with room left for firewood): a settlement without storehouses
+     * builds lower than its gravity would allow.
+     */
+    static BuildingStyle.Choice fitToStorage(BuildingType type, BuildingStyle.Choice style, double storageCap) {
+        double room = storageCap * 0.9;
+        int stories = style.stories();
+        while (stories > 1 && (timberCost(type, style.material(), stories) > room
+                || stoneCost(type, style.material(), stories) > room)) {
+            stories--;
+        }
+        if (stories == style.stories()) {
+            return style;
+        }
+        List<String> reasons = new ArrayList<>(style.reasons());
+        reasons.add(String.format(Locale.ROOT, "%d storeys rather than %d: the materials must fit in storage (%.0f)",
+                stories, style.stories(), storageCap));
+        return new BuildingStyle.Choice(style.material(), stories, reasons);
     }
 
     /**

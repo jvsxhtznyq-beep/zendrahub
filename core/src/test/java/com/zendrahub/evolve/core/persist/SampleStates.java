@@ -71,6 +71,7 @@ final class SampleStates {
         town.timber = 12.25;
         town.stone = 40;
         town.strategy = Strategy.OUTPOST;
+        town.strategySinceDay = 50;
         town.preferredMaterial = Material.STONE;
         town.timberHarvested = 900.5;
         town.foodProduced = 1234.75;

@@ -17,6 +17,7 @@ import com.zendrahub.evolve.core.model.Strategy;
 import com.zendrahub.evolve.core.model.TradeRoute;
 import com.zendrahub.evolve.core.model.WorldState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -120,10 +121,19 @@ public final class CivilizationSystem implements SimSystem {
     private long review(SimContext ctx, Settlement s, LocalArea area, Needs needs, long causeId) {
         Decision d = Planner.evaluate(ctx, s, area, needs, ledger, causeId);
         Strategy previous = s.strategy;
+        int committedUntil = s.strategySinceDay + ctx.config.civ.strategyMinDays;
+        if (d.chosen() != previous && s.lastDecision != null && ctx.day() < committedUntil) {
+            // A new course is given time to work before the settlement changes it again.
+            List<String> reasons = new ArrayList<>(d.reasons());
+            reasons.add(String.format(Locale.ROOT, "keeps %s until day %d before changing course again",
+                    previous, committedUntil));
+            d = new Decision(d.day(), previous, d.scores(), reasons, d.causeEventId());
+        }
         s.lastDecision = d;
         long changed = -1;
         if (d.chosen() != previous) {
             s.strategy = d.chosen();
+            s.strategySinceDay = ctx.day();
             Cell home = ctx.state.cell(s.home);
             changed = ctx.emit(EventType.STRATEGY_CHANGED, s.id, home.regionId, s.home,
                     String.format(Locale.ROOT, "%s turns from %s to %s (%s): %s", s.name, previous, d.chosen(),
@@ -266,6 +276,7 @@ public final class CivilizationSystem implements SimSystem {
             s.timber = timber;
             s.stone = stone;
             s.strategy = Strategy.OUTPOST;
+            s.strategySinceDay = ctx.day();
             BuildingStyle.Choice style = BuildingStyle.choose(ctx, s, BuildingType.OUTPOST_HALL);
             s.preferredMaterial = style.material();
             long founded = ctx.emit(EventType.OUTPOST_FOUNDED, s.id, cell.regionId, home,

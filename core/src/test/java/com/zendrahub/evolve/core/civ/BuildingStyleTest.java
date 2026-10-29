@@ -92,4 +92,14 @@ class BuildingStyleTest {
         Settlement town = TestWorlds.found(new CivilizationSystem(), st, cfg, "Oakridge", HOME, 20);
         return town.preferredMaterial;
     }
+
+    @Test
+    void buildingsMustFitInStorage() {
+        BuildingStyle.Choice tall = new BuildingStyle.Choice(Material.TIMBER, 4, java.util.List.of("low gravity"));
+        BuildingStyle.Choice small = Construction.fitToStorage(BuildingType.OUTPOST_HALL, tall, 100);
+        assertTrue(small.stories() < 4, "a 4-storey hall cannot be stockpiled in 100 storage");
+        assertTrue(Construction.timberCost(BuildingType.OUTPOST_HALL, Material.TIMBER, small.stories()) <= 90);
+        assertTrue(small.reasons().get(small.reasons().size() - 1).contains("storage"), small.reasons().toString());
+        assertEquals(4, Construction.fitToStorage(BuildingType.OUTPOST_HALL, tall, 400).stories());
+    }
 }
