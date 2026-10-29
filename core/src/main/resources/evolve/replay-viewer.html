@@ -238,7 +238,11 @@ td .delta { color: var(--danger); }
         const [x0, z0, x1, z1] = g.bounds;
         ctx.strokeRect(x0 * C + .75, z0 * C + .75, (x1 - x0) * C - 1.5, (z1 - z0) * C - 1.5);
         const env = f.env[gi];
-        ctx.fillText(`${g.name}  g${fmt(env[0], 1)}`, x0 * C + 4, z0 * C + 12);
+        // First word of the name plus gravity, clipped to the region so neighbours never overlap.
+        ctx.save();
+        ctx.beginPath(); ctx.rect(x0 * C, z0 * C, (x1 - x0) * C, (z1 - z0) * C); ctx.clip();
+        ctx.fillText(`${g.name.split(' ')[0]} g${fmt(env[0], 1)}`, x0 * C + 4, z0 * C + 12);
+        ctx.restore();
       });
     }
     // trade routes
@@ -267,9 +271,12 @@ td .delta { color: var(--danger); }
         ctx.fillRect(cx - side / 2, cz - side / 2, side, side);
         ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5; ctx.strokeRect(cx - side / 2, cz - side / 2, side, side);
       }
+      if (s.parent > 0 && s.abandoned) continue; // abandoned outposts stay as faded rings, unlabelled
       ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
       ctx.lineWidth = 3; ctx.strokeStyle = colors.panel; ctx.fillStyle = colors.ink;
-      const label = s.name + (s.abandoned ? ' (abandoned)' : '');
+      const parent = s.parent > 0 ? byId.get(s.parent) : null;
+      const short = parent && s.name.startsWith(parent.name + ' ') ? s.name.slice(parent.name.length + 1) : s.name;
+      const label = short + (s.abandoned ? ' (abandoned)' : '');
       const tx = Math.min(cx + side / 2 + 3, W * C - ctx.measureText(label).width - 2);
       ctx.strokeText(label, tx, cz + 4); ctx.fillText(label, tx, cz + 4);
     }
