@@ -1,0 +1,377 @@
+<title>EVOLVE World Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a survey desk - two map sheets side by side (stacked on phones), shared timeline above, ledgers below. */
+:root {
+  --bg: #eef1ec;
+  --panel: #f8faf6;
+  --ink: #1f2a24;
+  --muted: #5d6b62;
+  --rule: #cdd6cf;
+  --accent: #2f6f4f;
+  --focus: #1f5c9e;
+  --expand: #3a7d44;
+  --conserve: #2b7a9b;
+  --trade: #b07a12;
+  --outpost: #8a4fb0;
+  --danger: #b3392f;
+  --b-forest: #4f7a3a; --b-plains: #a9b86a; --b-hills: #8d8f62; --b-wetland: #6f8f78;
+  --b-desert: #d8c48a; --b-mountain: #9a9a96; --b-water: #4d7fa6;
+  --tree: #1d5a26; --animal: #6b3e1f; --built: #5b524a; --region: rgba(31, 42, 36, .55);
+  --font-display: "Silkscreen", "Courier New", monospace;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141a17; --panel: #1b231f; --ink: #e3ebe5; --muted: #9aab9f; --rule: #2e3a34;
+    --accent: #7fc29b; --focus: #8ab8ec;
+    --expand: #6fbf7a; --conserve: #5fb3d6; --trade: #e0ac45; --outpost: #b98be0; --danger: #ef7a6f;
+    --b-forest: #3c5e2c; --b-plains: #7d8a4c; --b-hills: #6c6e4a; --b-wetland: #4f6b58;
+    --b-desert: #9e8e5e; --b-mountain: #707070; --b-water: #2f5878;
+    --tree: #9fdc8a; --animal: #e3b58c; --built: #c9bfb4; --region: rgba(227, 235, 229, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141a17; --panel: #1b231f; --ink: #e3ebe5; --muted: #9aab9f; --rule: #2e3a34;
+  --accent: #7fc29b; --focus: #8ab8ec;
+  --expand: #6fbf7a; --conserve: #5fb3d6; --trade: #e0ac45; --outpost: #b98be0; --danger: #ef7a6f;
+  --b-forest: #3c5e2c; --b-plains: #7d8a4c; --b-hills: #6c6e4a; --b-wetland: #4f6b58;
+  --b-desert: #9e8e5e; --b-mountain: #707070; --b-water: #2f5878;
+  --tree: #9fdc8a; --animal: #e3b58c; --built: #c9bfb4; --region: rgba(227, 235, 229, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, 4vw, 34px); letter-spacing: .02em; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 70ch; }
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 14px;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button, select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 5px 12px; cursor: pointer; }
+button:hover, select:hover { border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.day { font-family: var(--font-data); font-variant-numeric: tabular-nums; min-width: 15ch; }
+.slider { flex: 1 1 220px; min-width: 0; accent-color: var(--accent); }
+.layers { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 13px; }
+.layers label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+.sheets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 18px; }
+.sheet { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.sheet h2 { font-family: var(--font-display); font-weight: 400; font-size: 17px; margin: 0; letter-spacing: .03em; }
+.map { position: relative; width: 100%; }
+canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; border-radius: 3px; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 6px 8px; font-size: 12px; font-family: var(--font-data); white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px 14px; }
+.stat { display: grid; gap: 1px; min-width: 0; }
+.stat .k { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.stat .v { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 15px; overflow-wrap: anywhere; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-family: var(--font-data); color: var(--bg); }
+.pill.EXPAND { background: var(--expand); } .pill.CONSERVE { background: var(--conserve); }
+.pill.TRADE { background: var(--trade); } .pill.OUTPOST { background: var(--outpost); }
+.scores { display: grid; gap: 4px; }
+.score { display: grid; grid-template-columns: 9ch 1fr 5ch; gap: 8px; align-items: center; font-family: var(--font-data); font-size: 12px; }
+.bar { height: 8px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.bar span { display: block; height: 100%; }
+.feed { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; font-size: 13px; }
+.feed li { display: grid; grid-template-columns: 7ch 1fr; gap: 8px; }
+.feed .d { font-family: var(--font-data); color: var(--muted); font-variant-numeric: tabular-nums; }
+.feed .t { font-family: var(--font-data); font-size: 11px; color: var(--muted); display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; }
+.ledger { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; display: grid; gap: 10px; }
+.ledger h2 { font-family: var(--font-display); font-weight: 400; font-size: 17px; margin: 0; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 500; }
+td.n { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+td .delta { color: var(--danger); }
+.note { color: var(--muted); font-size: 13px; margin: 0; max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>EVOLVE World Replay</h1>
+    <p class="lede" id="lede">Two runs of the same world and the same rules. The only difference is the forest around the home town on day 0.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Replay controls">
+    <button id="play" type="button">Play</button>
+    <span class="day" id="day">Day 0</span>
+    <input class="slider" id="frame" type="range" min="0" max="0" value="0" aria-label="Day">
+    <select id="speed" aria-label="Playback speed">
+      <option value="400">Slow</option>
+      <option value="160" selected>Normal</option>
+      <option value="60">Fast</option>
+    </select>
+    <div class="layers">
+      <label><input type="checkbox" id="l-forest" checked> Forest</label>
+      <label><input type="checkbox" id="l-animals" checked> Wildlife</label>
+      <label><input type="checkbox" id="l-built" checked> Built land</label>
+      <label><input type="checkbox" id="l-regions" checked> Regions</label>
+    </div>
+  </div>
+
+  <div class="sheets" id="sheets"></div>
+
+  <div class="legend" aria-label="Map legend">
+    <span><i style="background:var(--expand)"></i>Expand</span>
+    <span><i style="background:var(--conserve)"></i>Conserve</span>
+    <span><i style="background:var(--trade)"></i>Trade</span>
+    <span><i style="background:var(--outpost)"></i>Outpost</span>
+    <span><i style="background:var(--tree)"></i>Standing timber (darker squares, denser forest)</span>
+    <span><i style="background:var(--animal)"></i>Herbivores</span>
+    <span><i style="background:var(--built)"></i>Buildings and fields</span>
+    <span>Squares are towns, sized by population; rings are outposts; dashed lines are closed trade routes. One cell is one chunk (16 x 16 blocks).</span>
+  </div>
+
+  <section class="ledger">
+    <h2>Regional rules on this day</h2>
+    <p class="note">Every region has its own gravity, fertility, wood decay and storminess. They drift under explicit rules: soil erodes and storms worsen where forests are cut, and some regions have unstable gravity.</p>
+    <div class="tablewrap"><table id="regions"></table></div>
+  </section>
+</div>
+
+<script id="replay-data" type="application/json">/*__REPLAY_DATA__*/</script>
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById('replay-data').textContent);
+  const W = data.world.width, H = data.world.height;
+  const STRATS = ['EXPAND', 'CONSERVE', 'TRADE', 'OUTPOST'];
+  const BIOME_TOKENS = { FOREST: '--b-forest', PLAINS: '--b-plains', HILLS: '--b-hills', WETLAND: '--b-wetland', DESERT: '--b-desert', MOUNTAIN: '--b-mountain', WATER: '--b-water' };
+  const dec = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const biomes = dec(data.world.biomes);
+  const runs = data.runs.map(r => ({ label: r.label, frames: r.frames, cache: new Map() }));
+  const frameCount = Math.min(...runs.map(r => r.frames.length));
+  const els = { play: byId('play'), day: byId('day'), frame: byId('frame'), speed: byId('speed'), sheets: byId('sheets'), regions: byId('regions') };
+  const layers = { forest: byId('l-forest'), animals: byId('l-animals'), built: byId('l-built'), regions: byId('l-regions') };
+  let index = 0, timer = null, colors = readColors();
+
+  function byId(id) { return document.getElementById(id); }
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const get = (n) => cs.getPropertyValue(n).trim();
+    const out = { biome: data.world.biomeNames.map(n => get(BIOME_TOKENS[n] || '--b-plains')) };
+    for (const k of ['ink', 'muted', 'tree', 'animal', 'built', 'region', 'panel', 'danger', 'expand', 'conserve', 'trade', 'outpost', 'bg']) out[k] = get('--' + k);
+    return out;
+  }
+  function layersOf(run, i) {
+    if (!run.cache.has(i)) {
+      const f = run.frames[i];
+      run.cache.set(i, { timber: dec(f.timber), animals: dec(f.herbivores), built: dec(f.built) });
+    }
+    return run.cache.get(i);
+  }
+  const fmt = (v, d = 2) => Number(v).toFixed(d);
+
+  // Build one sheet per run.
+  runs.forEach((run, r) => {
+    const sheet = document.createElement('section');
+    sheet.className = 'sheet';
+    sheet.innerHTML = `
+      <h2>${run.label}</h2>
+      <div class="map"><canvas width="${W * 16}" height="${H * 16}" aria-label="Map of ${run.label}"></canvas><div class="tip" hidden></div></div>
+      <div class="stats"></div>
+      <div class="scores" aria-label="Last decision scores"></div>
+      <ul class="feed" aria-label="Events"></ul>`;
+    els.sheets.appendChild(sheet);
+    run.canvas = sheet.querySelector('canvas');
+    run.tip = sheet.querySelector('.tip');
+    run.stats = sheet.querySelector('.stats');
+    run.scores = sheet.querySelector('.scores');
+    run.feed = sheet.querySelector('.feed');
+    run.canvas.addEventListener('mousemove', (e) => hover(run, e));
+    run.canvas.addEventListener('mouseleave', () => { run.tip.hidden = true; });
+  });
+
+  function draw(run) {
+    const ctx = run.canvas.getContext('2d');
+    const C = 16;
+    const f = run.frames[index];
+    const L = layersOf(run, index);
+    for (let z = 0; z < H; z++) for (let x = 0; x < W; x++) {
+      const i = z * W + x;
+      ctx.fillStyle = colors.biome[biomes[i]] || colors.bg;
+      ctx.fillRect(x * C, z * C, C, C);
+      if (layers.forest.checked && L.timber[i] > 0) {
+        const share = L.timber[i] / 255;
+        const side = Math.round(4 + share * 10);
+        ctx.globalAlpha = 0.25 + share * 0.75;
+        ctx.fillStyle = colors.tree;
+        ctx.fillRect(x * C + (C - side) / 2, z * C + (C - side) / 2, side, side);
+        ctx.globalAlpha = 1;
+      }
+      if (layers.built.checked && L.built[i] > 0) {
+        ctx.fillStyle = colors.built;
+        const h = Math.max(2, Math.round(L.built[i] / 255 * C));
+        ctx.fillRect(x * C, z * C + C - h, C, h);
+      }
+      if (layers.animals.checked && L.animals[i] > 8) {
+        ctx.fillStyle = colors.animal;
+        const rad = 1 + (L.animals[i] / 255) * 3;
+        ctx.beginPath(); ctx.arc(x * C + C * 0.78, z * C + C * 0.22, rad, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    if (layers.regions.checked) {
+      ctx.strokeStyle = colors.region; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+      ctx.font = '600 10px ' + getComputedStyle(document.body).fontFamily;
+      ctx.fillStyle = colors.region;
+      data.world.regions.forEach((g, gi) => {
+        const [x0, z0, x1, z1] = g.bounds;
+        ctx.strokeRect(x0 * C + .75, z0 * C + .75, (x1 - x0) * C - 1.5, (z1 - z0) * C - 1.5);
+        const env = f.env[gi];
+        ctx.fillText(`${g.name}  g${fmt(env[0], 1)}`, x0 * C + 4, z0 * C + 12);
+      });
+    }
+    // trade routes
+    for (const [ax, az, bx, bz, active] of f.routes) {
+      ctx.strokeStyle = colors.trade; ctx.lineWidth = 2.5; ctx.setLineDash(active ? [] : [5, 4]);
+      ctx.beginPath(); ctx.moveTo(ax * C + C / 2, az * C + C / 2); ctx.lineTo(bx * C + C / 2, bz * C + C / 2); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // settlements
+    const byId = new Map(f.settlements.map(s => [s.id, s]));
+    for (const s of f.settlements) {
+      const cx = s.x * C + C / 2, cz = s.z * C + C / 2;
+      const color = colors[s.strategy.toLowerCase()] || colors.ink;
+      if (s.parent > 0 && byId.has(s.parent)) {
+        const p = byId.get(s.parent);
+        ctx.strokeStyle = colors.outpost; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(cx, cz); ctx.lineTo(p.x * C + C / 2, p.z * C + C / 2); ctx.stroke(); ctx.setLineDash([]);
+      }
+      const side = 6 + Math.sqrt(Math.max(0, s.population)) * 2.2;
+      if (s.parent > 0) {
+        ctx.strokeStyle = s.abandoned ? colors.muted : color; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(cx, cz, side / 2, 0, Math.PI * 2); ctx.stroke();
+      } else {
+        ctx.fillStyle = s.abandoned ? colors.muted : color;
+        ctx.fillRect(cx - side / 2, cz - side / 2, side, side);
+        ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5; ctx.strokeRect(cx - side / 2, cz - side / 2, side, side);
+      }
+      ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
+      ctx.lineWidth = 3; ctx.strokeStyle = colors.panel; ctx.fillStyle = colors.ink;
+      const label = s.name + (s.abandoned ? ' (abandoned)' : '');
+      const tx = Math.min(cx + side / 2 + 3, W * C - ctx.measureText(label).width - 2);
+      ctx.strokeText(label, tx, cz + 4); ctx.fillText(label, tx, cz + 4);
+    }
+  }
+
+  function homeOf(f) { return f.settlements.find(s => s.parent < 0) || f.settlements[0]; }
+
+  function panel(run) {
+    const f = run.frames[index];
+    const home = homeOf(f);
+    const outposts = f.settlements.filter(s => home && s.parent === home.id);
+    const g = home ? regionAt(home.x, home.z) : -1;
+    const env = g >= 0 ? f.env[g] : null;
+    const people = f.settlements.reduce((a, s) => a + s.population, 0);
+    const stat = (k, v) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+    run.stats.innerHTML = home ? [
+      stat(home.name, `${home.population} people`),
+      stat('Strategy', `<span class="pill ${home.strategy}">${home.strategy}</span>`),
+      stat('Builds in', home.material.replace('_', ' ').toLowerCase() + (home.maxStories > 1 ? `, up to ${home.maxStories} storeys` : '')),
+      stat('Buildings', home.buildings),
+      stat('Outposts', outposts.filter(o => !o.abandoned).length + (outposts.some(o => o.abandoned) ? ` (+${outposts.filter(o => o.abandoned).length} abandoned)` : '')),
+      stat('Trade routes', f.routes.filter(r => r[4]).length),
+      stat('Stocks f / t / s', `${fmt(home.food, 0)} / ${fmt(home.timber, 0)} / ${fmt(home.stone, 0)}`),
+      stat('World population', people),
+      env ? stat('Home region', `g ${fmt(env[0])}, fert ${fmt(env[1])}`) : '',
+      env ? stat('Forest cover', fmt(env[4] * 100, 0) + '%') : ''
+    ].join('') : '<p class="note">No settlements.</p>';
+    const scores = home && home.scores ? home.scores : null;
+    run.scores.innerHTML = scores ? STRATS.map(s => `
+      <div class="score"><span>${s}</span><span class="bar"><span style="width:${Math.max(0, Math.min(1, scores[s] ?? 0)) * 100}%;background:var(--${s.toLowerCase()})"></span></span><span>${fmt(scores[s] ?? 0)}</span></div>`).join('')
+      : '<p class="note">No strategic evaluation yet.</p>';
+    const recent = [];
+    for (let i = index; i >= 0 && recent.length < 14; i--) {
+      const evs = run.frames[i].events;
+      for (let j = evs.length - 1; j >= 0 && recent.length < 14; j--) recent.push(evs[j]);
+    }
+    run.feed.innerHTML = recent.map(e => `<li><span class="d">day ${e.day}</span><span><span class="t">${e.type.replaceAll('_', ' ').toLowerCase()}</span>${escapeHtml(e.message)}</span></li>`).join('')
+      || '<li><span class="d"></span><span>No events yet.</span></li>';
+  }
+
+  function regionAt(x, z) {
+    return data.world.regions.findIndex(g => x >= g.bounds[0] && z >= g.bounds[1] && x < g.bounds[2] && z < g.bounds[3]);
+  }
+
+  function regionsTable() {
+    const fa = runs[0].frames[index], fb = runs[1] ? runs[1].frames[index] : null;
+    const head = `<tr><th>Region</th><th>Gravity</th><th>Fertility</th><th>Wood decay</th><th>Storms / day</th><th>Forest</th>${fb ? `<th>${escapeHtml(runs[1].label)}: forest</th><th>fertility</th><th>storms</th>` : ''}</tr>`;
+    const rows = data.world.regions.map((g, i) => {
+      const a = fa.env[i], b = fb ? fb.env[i] : null;
+      const diff = (x, y, d = 2) => b && Math.abs(x - y) > 0.005 ? `<span class="delta">${fmt(y, d)}</span>` : (b ? fmt(y, d) : '');
+      return `<tr><td>${escapeHtml(g.name)}${g.gravityFlux ? ' (unstable gravity)' : ''}</td><td class="n">${fmt(a[0])}</td><td class="n">${fmt(a[1])}</td><td class="n">${fmt(a[2] / 10, 2)}%</td><td class="n">${fmt(a[3])}</td><td class="n">${fmt(a[4] * 100, 0)}%</td>${b ? `<td class="n">${diff(a[4] * 100, b[4] * 100, 0)}%</td><td class="n">${diff(a[1], b[1])}</td><td class="n">${diff(a[3], b[3])}</td>` : ''}</tr>`;
+    });
+    els.regions.innerHTML = `<thead>${head}</thead><tbody>${rows.join('')}</tbody>`;
+  }
+
+  function hover(run, e) {
+    const rect = run.canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / rect.width * W);
+    const z = Math.floor((e.clientY - rect.top) / rect.height * H);
+    if (x < 0 || z < 0 || x >= W || z >= H) { run.tip.hidden = true; return; }
+    const i = z * W + x, L = layersOf(run, index), g = regionAt(x, z), f = run.frames[index];
+    const env = g >= 0 ? f.env[g] : null;
+    run.tip.innerHTML = `cell ${x}, ${z}  ${data.world.biomeNames[biomes[i]].toLowerCase()}<br>timber ~${Math.round(L.timber[i] / 255 * 240)} logs, herbivores ~${fmt(L.animals[i] / 255 * 12, 1)}`
+      + (env ? `<br>${escapeHtml(data.world.regions[g].name)}: gravity ${fmt(env[0])}, fertility ${fmt(env[1])}` : '');
+    run.tip.hidden = false;
+    const left = Math.min(e.clientX - rect.left + 12, rect.width - run.tip.offsetWidth - 4);
+    run.tip.style.left = Math.max(0, left) + 'px';
+    run.tip.style.top = (e.clientY - rect.top + 14) + 'px';
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+  function render() {
+    const f = runs[0].frames[index];
+    els.day.textContent = `Day ${f.day} · ${f.season.toLowerCase()}`;
+    els.frame.value = index;
+    runs.forEach(run => { draw(run); panel(run); });
+    regionsTable();
+  }
+
+  function setPlaying(on) {
+    if (timer) { clearInterval(timer); timer = null; }
+    els.play.textContent = on ? 'Pause' : 'Play';
+    if (on) timer = setInterval(() => {
+      if (index >= frameCount - 1) { setPlaying(false); return; }
+      index++; render();
+    }, Number(els.speed.value));
+  }
+
+  els.frame.max = frameCount - 1;
+  els.frame.addEventListener('input', () => { index = Number(els.frame.value); render(); });
+  els.play.addEventListener('click', () => {
+    if (!timer && index >= frameCount - 1) index = 0;
+    setPlaying(!timer);
+  });
+  els.speed.addEventListener('change', () => { if (timer) setPlaying(true); });
+  Object.values(layers).forEach(cb => cb.addEventListener('change', render));
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const retheme = () => { colors = readColors(); render(); };
+  mq.addEventListener ? mq.addEventListener('change', retheme) : mq.addListener(retheme);
+  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  byId('lede').textContent = `Two runs of seed ${data.world.seed}, ${runs[0].frames[frameCount - 1].day} days each: same world, same rules, same towns. The only difference is the forest around the home town on day 0.`;
+  index = frameCount - 1;
+  render();
+})();
+</script>

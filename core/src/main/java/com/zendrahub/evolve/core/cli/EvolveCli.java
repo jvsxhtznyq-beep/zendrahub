@@ -104,13 +104,37 @@ public final class EvolveCli {
                         Replay.record("Abundant timber", abundant, days, every),
                         Replay.record("Depleted forest", depleted, days, every)));
                 Path file = Path.of(o.require("out"));
-                Files.writeString(file, Json.write(root));
+                String json = Json.write(root);
+                if (file.getFileName().toString().endsWith(".html")) {
+                    Files.writeString(file, viewerPage(json, !o.flag("fragment")));
+                } else {
+                    Files.writeString(file, json);
+                }
                 out.println("Wrote " + (days / every + 1) + " frames per run to " + file);
             }
             case "help", "--help", "-h" -> usage(out);
             default -> throw new IllegalArgumentException("unknown command '" + command + "'");
         }
         return 0;
+    }
+
+    /** The replay viewer with the data embedded; standalone pages get a full document around it. */
+    private static String viewerPage(String json, boolean standalone) throws IOException {
+        String template;
+        try (var in = EvolveCli.class.getResourceAsStream("/evolve/replay-viewer.html")) {
+            if (in == null) {
+                throw new IOException("replay viewer template is missing from the classpath");
+            }
+            template = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        // "</" inside a script element would end it early; "<\/" is the same JSON string.
+        String page = template.replace("/*__REPLAY_DATA__*/", json.replace("</", "<\\/"));
+        if (!standalone) {
+            return page;
+        }
+        return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+                + "</head>\n<body>\n" + page + "\n</body>\n</html>\n";
     }
 
     private static WorldState load(PrintStream out, Path file) throws IOException {
@@ -156,7 +180,8 @@ public final class EvolveCli {
                   inspect FILE [--events N]
                   why     FILE EVENT_ID                      causal chain behind an event
                   bench   [--quick]                          throughput, memory and save/load timings
-                  replay  --out FILE [--seed N] [--days N] [--every N]  frames of both forest scenarios for the viewer
+                  replay  --out FILE [--seed N] [--days N] [--every N] [--fragment]
+                                                     both forest scenarios as replay data (.json) or a viewer page (.html)
                 """);
     }
 
