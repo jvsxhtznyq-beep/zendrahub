@@ -33,9 +33,7 @@ final class Trade {
 
     /** A route between a town and its own outpost: hauling, not trade. */
     static boolean isSupplyRoad(WorldState st, TradeRoute r) {
-        Settlement a = st.settlement(r.fromId);
-        Settlement b = st.settlement(r.toId);
-        return a != null && b != null && related(a, b);
+        return r.isSupplyRoad(st);
     }
 
     /** The active supply road between an outpost and its town, or null. */

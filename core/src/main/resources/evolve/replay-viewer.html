@@ -242,7 +242,8 @@ td .delta { color: var(--danger); }
       });
     }
     // trade routes
-    for (const [ax, az, bx, bz, active] of f.routes) {
+    for (const [ax, az, bx, bz, active, supply] of f.routes) {
+      if (supply) continue; // supply roads to outposts are drawn with the outposts
       ctx.strokeStyle = colors.trade; ctx.lineWidth = 2.5; ctx.setLineDash(active ? [] : [5, 4]);
       ctx.beginPath(); ctx.moveTo(ax * C + C / 2, az * C + C / 2); ctx.lineTo(bx * C + C / 2, bz * C + C / 2); ctx.stroke();
     }
@@ -290,7 +291,7 @@ td .delta { color: var(--danger); }
       stat('Builds in', home.material.replace('_', ' ').toLowerCase() + (home.maxStories > 1 ? `, up to ${home.maxStories} storeys` : '')),
       stat('Buildings', home.buildings),
       stat('Outposts', outposts.filter(o => !o.abandoned).length + (outposts.some(o => o.abandoned) ? ` (+${outposts.filter(o => o.abandoned).length} abandoned)` : '')),
-      stat('Trade routes', f.routes.filter(r => r[4]).length),
+      stat('Trade routes', f.routes.filter(r => r[4] && !r[5]).length),
       stat('Stocks f / t / s', `${fmt(home.food, 0)} / ${fmt(home.timber, 0)} / ${fmt(home.stone, 0)}`),
       stat('World population', people),
       env ? stat('Home region', `g ${fmt(env[0])}, fert ${fmt(env[1])}`) : '',

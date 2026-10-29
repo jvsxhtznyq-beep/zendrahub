@@ -209,16 +209,22 @@ final class EvolveCommands {
             }
         }
         int routes = 0;
+        int roads = 0;
         for (TradeRoute r : s.routes) {
             if (r.active) {
-                routes++;
+                if (r.isSupplyRoad(s)) {
+                    roads++;
+                } else {
+                    routes++;
+                }
             }
         }
         say(src, Text.header("EVOLVE: day " + s.day + ", " + Text.lower(s.season()) + " of year " + (s.year() + 1)));
         say(src, Text.field("clock", rt.settings.ticksPerDay + " ticks/day ("
                 + Text.num(rt.settings.ticksPerDay / 20.0) + " s)" + (rt.settings.paused ? ", PAUSED" : "")));
         say(src, Text.field("world", towns + " towns, " + outposts + " outposts, " + people + " people, "
-                + standing + " buildings, " + routes + " trade routes, " + s.regions.size() + " regions"));
+                + standing + " buildings, " + routes + " trade routes, " + roads + " supply roads, "
+                + s.regions.size() + " regions"));
         say(src, Text.field("history", s.events.totalRecorded() + " events; world changes queued "
                 + rt.queuedJobs() + " (" + rt.waitingJobs() + " waiting for chunks to load)"));
     }
@@ -334,7 +340,9 @@ final class EvolveCommands {
         say(src, Text.field("buildings", describe(owned)));
         for (TradeRoute r : s.routes) {
             if (r.connects(t.id)) {
-                say(src, Text.field("trade", (r.active ? "" : "closed ") + "route with " + nameOf(s, r.other(t.id))
+                boolean supply = r.isSupplyRoad(s);
+                say(src, Text.field(supply ? "road" : "trade", (r.active ? "" : "closed ")
+                        + (supply ? "supply road to " : "route with ") + nameOf(s, r.other(t.id))
                         + " since day " + r.establishedDay + ": timber " + Text.num(r.timberMoved) + ", food "
                         + Text.num(r.foodMoved) + ", stone " + Text.num(r.stoneMoved)));
             }

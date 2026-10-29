@@ -147,7 +147,8 @@ final class Replay {
         for (TradeRoute r : s.routes) {
             Settlement a = s.settlement(r.fromId);
             Settlement b = s.settlement(r.toId);
-            routes.add(List.of((long) a.home.x(), (long) a.home.z(), (long) b.home.x(), (long) b.home.z(), r.active));
+            routes.add(List.of((long) a.home.x(), (long) a.home.z(), (long) b.home.x(), (long) b.home.z(), r.active,
+                    r.isSupplyRoad(s)));
         }
         f.put("routes", routes);
 

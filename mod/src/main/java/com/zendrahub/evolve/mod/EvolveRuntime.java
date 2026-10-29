@@ -10,6 +10,7 @@ import com.zendrahub.evolve.core.model.GridPos;
 import com.zendrahub.evolve.core.model.Settlement;
 import com.zendrahub.evolve.core.model.WorldState;
 import com.zendrahub.evolve.core.persist.SaveManager;
+import com.zendrahub.evolve.core.scenario.Scenarios;
 import com.zendrahub.evolve.core.util.DetRandom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -36,7 +37,6 @@ final class EvolveRuntime {
     /** Cells around the founder that are measured from the real world at start. */
     private static final int START_SURVEY_RADIUS = 3;
     private static final long ESTIMATE_STREAM = 404;
-    private static final long NEIGHBOUR_STREAM = 405;
 
     /** A command could not be carried out; the message is shown to the player. */
     static final class Refusal extends Exception {
@@ -244,29 +244,13 @@ final class EvolveRuntime {
         WorldGen.refreshRegionBaselines(state);
     }
 
-    /** A buildable cell 8-14 cells from home, preferring wooded and hilly land; seeded tie-break. */
+    /**
+     * A livable site with good quarrying 8-14 cells from home (any distance
+     * beyond 8 if none is that close), or null when the area has none.
+     */
     private static GridPos neighbourSite(WorldState state, GridPos home) {
-        GridPos best = null;
-        double bestScore = -1;
-        for (Cell cell : state.cells()) {
-            int d = cell.pos().chebyshev(home);
-            if (d < 8 || d > 14 || !cell.biome.buildable()) {
-                continue;
-            }
-            double score = switch (cell.biome) {
-                case FOREST -> 1.0;
-                case HILLS -> 0.9;
-                case PLAINS -> 0.8;
-                case WETLAND -> 0.5;
-                case MOUNTAIN -> 0.4;
-                default -> 0.3;
-            } + 0.5 * DetRandom.unit(state.seed, NEIGHBOUR_STREAM, cell.x, cell.z);
-            if (score > bestScore) {
-                bestScore = score;
-                best = cell.pos();
-            }
-        }
-        return best;
+        GridPos site = Scenarios.neighbourSite(state, home, 8, 14);
+        return site != null ? site : Scenarios.neighbourSite(state, home, 8, Integer.MAX_VALUE);
     }
 
     Settlement found(ServerPlayer player, String name) throws Refusal {

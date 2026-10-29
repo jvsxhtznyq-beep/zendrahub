@@ -111,10 +111,11 @@ final class Report {
         }
     }
 
+    /** Trade routes (not supply roads to its own outposts) the settlement has ever had. */
     static int countRoutes(WorldState s, Settlement t) {
         int n = 0;
         for (TradeRoute r : s.routes) {
-            if (r.connects(t.id)) {
+            if (r.connects(t.id) && !r.isSupplyRoad(s)) {
                 n++;
             }
         }

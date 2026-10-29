@@ -93,14 +93,24 @@ public final class Scenarios {
      * a stone site in barren mountains would only starve.
      */
     public static GridPos stoneSite(WorldState s, GridPos awayFrom, int minDistance) {
+        return neighbourSite(s, awayFrom, minDistance, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Like {@link #stoneSite}, limited to sites between {@code minDistance} and
+     * {@code maxDistance} cells (king moves) from {@code awayFrom}. Hosts use it
+     * to place a neighbouring town that can survive and trade.
+     */
+    public static GridPos neighbourSite(WorldState s, GridPos awayFrom, int minDistance, int maxDistance) {
         GridPos best = null;
         double bestScore = -1;
         for (int z = 1; z < s.height - 1; z++) {
             for (int x = 1; x < s.width - 1; x++) {
                 Cell c = s.cell(x, z);
                 GridPos p = new GridPos(x, z);
+                int distance = p.chebyshev(awayFrom);
                 if (!c.biome.buildable() || c.biome == Biome.MOUNTAIN || c.biome == Biome.DESERT
-                        || p.chebyshev(awayFrom) < minDistance) {
+                        || distance < minDistance || distance > maxDistance) {
                     continue;
                 }
                 double stone = 0;
