@@ -20,6 +20,11 @@ public final class Region {
     /** Herbivores when the region was generated, for change tracking. */
     public double initialHerbivores;
 
+    /** Set while the region's forests count as depleted; gives forest events hysteresis. */
+    public boolean forestDepleted;
+    /** Set while the region's wildlife counts as depleted; gives wildlife events hysteresis. */
+    public boolean wildlifeDepleted;
+
     public Region(int id, String name, int x0, int z0, int x1, int z1) {
         this.id = id;
         this.name = name;

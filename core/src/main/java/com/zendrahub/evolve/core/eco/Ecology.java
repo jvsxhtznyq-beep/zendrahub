@@ -21,7 +21,27 @@ public final class Ecology {
 
     /** Timber the cell can hold given its biome and what is built on it. */
     public static double timberCapacity(Cell c) {
-        return c.biome.timberCapacity * (1.0 - c.builtArea);
+        return c.biome.timberCapacity * unbuiltShare(c);
+    }
+
+    /** Wild forage the cell can hold given its biome and what is built on it. */
+    public static double forageCapacity(Cell c) {
+        return c.biome.forageCapacity * unbuiltShare(c);
+    }
+
+    /** Share of the cell still open to nature, 0..1. */
+    public static double unbuiltShare(Cell c) {
+        return Math.min(1.0, Math.max(0.0, 1.0 - c.builtArea));
+    }
+
+    /**
+     * Returns built-over ground to nature, for example when a building's ruin
+     * has crumbled away: frees {@code area} of the cell's built share and seeds
+     * it with {@code saplings} so forest can return.
+     */
+    public static void reclaim(Cell c, double area, double saplings) {
+        c.builtArea = Math.max(0.0, c.builtArea - Math.max(0.0, area));
+        plant(c, saplings);
     }
 
     /** Removes up to {@code want} logs of standing timber; returns what was taken. */
