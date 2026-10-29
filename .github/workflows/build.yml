@@ -49,22 +49,15 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v4
-      - name: Resolve the Fabric toolchain
-        id: fabric
+      - name: Report newer Fabric builds for this Minecraft version
+        continue-on-error: true
         run: |
           mc=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
-          if python3 .github/scripts/resolve_fabric_versions.py "$mc" > fabric-out.txt 2> fabric-versions.txt; then
-            cat fabric-out.txt >> fabric-versions.txt
-            cat fabric-versions.txt
-            cat fabric-out.txt >> "$GITHUB_OUTPUT"
-          else
-            cat fabric-versions.txt
-            exit 1
-          fi
+          python3 .github/scripts/resolve_fabric_versions.py "$mc" 2>&1 | tee fabric-versions.txt
       - name: Build the mod
         run: |
           set -o pipefail
-          ./gradlew :mod:build ${{ steps.fabric.outputs.gradle_args }} --stacktrace 2>&1 | tee mod.log
+          ./gradlew :mod:build --stacktrace 2>&1 | tee mod.log
       - name: Upload the mod jar
         uses: actions/upload-artifact@v4
         with:

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Find the newest Fabric toolchain for a Minecraft version.
 
-Prints GitHub Actions output lines (key=value) on stdout, including
-`gradle_args`, the -P overrides for gradle.properties, and a readable summary
-on stderr. Exits non-zero, explaining why, when the version is not supported.
+Prints key=value lines on stdout, including `gradle_args` (the -P overrides
+that would build against these versions instead of gradle.properties), and a
+readable summary on stderr. Exits non-zero, explaining why, when the version
+is not supported. CI runs it to report available upgrades.
 
 Usage: resolve_fabric_versions.py <minecraft_version>
 """
